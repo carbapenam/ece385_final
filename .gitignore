@@ -1,0 +1,15 @@
+# paths to ignore
+/docs
+/**/db
+/**/incremental_db
+/**/output_files
+/**/simulation
+/**/greybox_tmp
+/**/other_assets
+/**/RemoteSystemsTempFiles
+
+
+# extensions to ignore
+*.bak
+*.rpt
+*.tcl~
