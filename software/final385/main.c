@@ -53,16 +53,5 @@ int main()
 			VGA_PTR[1] = 0;
 			VGA_PTR[2] = 255;
 		}
-
-		/*
-		dx = x + .5 * sin(sec/5.0);
-		dy = y + .5 * cos(sec/3.0);
-
-		dv = sin(x*10 + sec) + sin(10*(x*sin(sec/2.0) + y*cos(sec/3.0)) + sec) + sin(sqrt(100*(dx*dx + dy*dy)+1) + sec);
-
-		VGA_PTR[0] = (char) 255*fabs(sin(dv*pi));
-		VGA_PTR[1] = (char) 255*fabs(sin(dv*pi + 2*pi/3));
-		VGA_PTR[2] = (char) 255*fabs(sin(dv*pi + 4*pi/3));*/
-
 	}
 }

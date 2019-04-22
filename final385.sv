@@ -1,4 +1,4 @@
-module final   ( input	       CLOCK_50, 
+module final385  ( input	       CLOCK_50, 
 					  input  [3:0]  KEY,
 					  input  [7:0]  SW,
 					  output [7:0]  LEDG,
@@ -59,7 +59,7 @@ module final   ( input	       CLOCK_50,
 
 	  // You need to make sure that the port names here are identical to the port names at 
 	  // the interface in lab7_soc.v
-	  final_soc final_soc_instance(.clk_clk(CLOCK_50),
+	  final385_soc final385_soc_instance(.clk_clk(CLOCK_50),
 								 .reset_reset_n(KEY[0]), 
 								 .vga_export_new_signal(VGA_EXPORT_DATA),  	// Exported data
 								 .sdram_wire_addr(DRAM_ADDR),    //  sdram_wire.addr
