@@ -13,3 +13,8 @@
 *.bak
 *.rpt
 *.tcl~
+*.a
+*.d
+*.o
+*.objdump
+*.map
