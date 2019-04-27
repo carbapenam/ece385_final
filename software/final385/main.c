@@ -1,13 +1,14 @@
+#include "system.h"
+#include "alt_types.h"
+#include <unistd.h>  // usleep
+#include "sys/alt_irq.h"
+#include "altera_up_avalon_video_pixel_buffer_dma.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <io.h>
 #include <fcntl.h>
-
-#include "system.h"
-#include "alt_types.h"
-#include <unistd.h>  // usleep
-#include "sys/alt_irq.h"
 
 #include "io_handler.h"
 #include "cy7c67200.h"
@@ -17,56 +18,39 @@
 
 #define pi 3.14159
 
-volatile unsigned int * VGA_PTR = (unsigned int *) 0x00000020;
+volatile alt_u32 *SDRAM_PTR = SDRAM_BASE;
+
 void keyboard();
 
 int main()
 {
-	int x;
-	int y;
-	int sec = 1;
-	double dx,dy,dv;
-	int counter = 0;
+alt_up_pixel_buffer_dma_dev * pixel_buf_dev;
+// open the Pixel Buffer port
+pixel_buf_dev = alt_up_pixel_buffer_dma_open_dev ("/dev/video_pixel_buffer_dma_0");
+if ( pixel_buf_dev == NULL)
+printf ("Error: could not open pixel buffer device \n");
+else
+printf ("Opened pixel buffer device \n");
+/* Clear and draw a blue box on the screen */
+alt_up_pixel_buffer_dma_clear_screen (pixel_buf_dev,0);
+alt_up_pixel_buffer_dma_clear_screen (pixel_buf_dev,1);
+printf("cleared screen\n");
 
-	int color = 0;
+int address = 0;
 
-	while(1)
+for (int y=0; y<480; y++)
+{
+	for (int x =0; x<640; x++)
 	{
-		keyboard();
-
-		x = VGA_PTR[3];
-		y = VGA_PTR[4];
-
-		if (y % 40 == 0)
-		{
-			color++;
-			color = color % 3;
-		}
-
-		if (color == 0)
-		{
-			VGA_PTR[0] = 255;
-			VGA_PTR[1] = 0;
-			VGA_PTR[2] = 0;
-		}
-
-		else if (color == 1)
-		{
-			VGA_PTR[0] = 0;
-			VGA_PTR[1] = 255;
-			VGA_PTR[2] = 0;
-		}
-
-
-		else if (color == 2)
-		{
-			VGA_PTR[0] = 0;
-			VGA_PTR[1] = 0;
-			VGA_PTR[2] = 255;
-		}
+		address = x + 640*y;
+		alt_u32 data = SDRAM_PTR[address];
+		alt_u16 color = (data | 0xFFFF00) >> 16;
+		//printf("%d, %d, %x, %x\n", x,y,data,color);
+		alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
 	}
 }
-
+alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
+}
 void keyboard(){
 	IO_init();
 
@@ -554,7 +538,11 @@ void keyboard(){
 		printf("\nfirst two keycode values are %04x\n",keycode);
 		// We only need the first keycode, which is at the lower byte of keycode.
 		// Send the keycode to hardware via PIO.
-		*keycode_base = keycode & 0xff;
+
+		//TODO: FIX THIS AS WELL. why the hell is keycode_base not getting resolved
+		//      when it's definitely there?!
+
+		//*keycode_base = keycode & 0xff;
 
 		usleep(200);//usleep(5000);
 		usb_ctl_val = UsbRead(ctl_reg);
@@ -592,7 +580,5 @@ void keyboard(){
 		}
 
 	}//end while
-
-	return 0;
 }
 

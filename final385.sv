@@ -23,35 +23,23 @@ module final385  ( input	       CLOCK_50,
                                      VGA_SYNC_N,   //VGA Sync signal
                                      VGA_BLANK_N,  //VGA Blank signal
                                      VGA_VS,       //VGA virtical sync signal
-                                     VGA_HS       //VGA horizontal sync signal					  
+                                     VGA_HS,       //VGA horizontal sync signal
+						
+					  //SRAM
+					  	inout  [15:0] SRAM_DQ,           //       sram_wire.DQ
+		            output [19:0] SRAM_ADDR,         //                .ADDR
+		            output        SRAM_LB_N,         //                .LB_N
+		            output        SRAM_UB_N,         //                .UB_N
+		            output        SRAM_CE_N,         //                .CE_N
+		            output        SRAM_OE_N,         //                .OE_N
+		            output        SRAM_WE_N          //                .WE_N
 );
 
 	 logic Reset_h, Clk;
-	 logic [31:0] VGA_EXPORT_DATA;
 	 //logic [7:0] keycode;
 	 
 	 assign Clk = CLOCK_50;
-	 
-	//VGA_EXPORT_DATA has following structure:
-	//0:7 - Red
-	//8:15 - Green
-	//16:23 - Blue
-	//24 - VGA_HS
-	//25 - VGA_VS
-	//26 - VGA_BLANK_N
-	//27 - VGA_SYNC_N
-	//28 - VGA_CLK
-	//29:31 - 0
-		 
-	 assign VGA_R[7:0] = VGA_EXPORT_DATA[7:0];
-	 assign VGA_G[7:0] = VGA_EXPORT_DATA[15:8];
-	 assign VGA_B[7:0] = VGA_EXPORT_DATA[23:16];
-	 assign VGA_HS = VGA_EXPORT_DATA[24]; 
-	 assign VGA_VS = VGA_EXPORT_DATA[25]; 
-	 assign VGA_BLANK_N = VGA_EXPORT_DATA[26];
-	 assign VGA_SYNC_N = VGA_EXPORT_DATA[27];    		 
-	 assign VGA_CLK = VGA_EXPORT_DATA[28];     
-
+ 
 	 
 	 always_ff @ (posedge Clk) begin
 		  Reset_h <= ~(KEY[0]);        // The push buttons are active low
@@ -61,7 +49,6 @@ module final385  ( input	       CLOCK_50,
 	  // the interface in lab7_soc.v
 	  final385_soc final385_soc_instance(.clk_clk(CLOCK_50),
 								 .reset_reset_n(KEY[0]), 
-								 .vga_export_new_signal(VGA_EXPORT_DATA),  	// Exported data
 								 .sdram_wire_addr(DRAM_ADDR),    //  sdram_wire.addr
 								 .sdram_wire_ba(DRAM_BA),      	//  .ba
 								 .sdram_wire_cas_n(DRAM_CAS_N),    //  .cas_n
@@ -71,7 +58,24 @@ module final385  ( input	       CLOCK_50,
 								 .sdram_wire_dqm(DRAM_DQM),     	//  .dqm
 								 .sdram_wire_ras_n(DRAM_RAS_N),    //  .ras_n
 								 .sdram_wire_we_n(DRAM_WE_N),      //  .we_n
-								 .sdram_clk_clk(DRAM_CLK)			//  clock out to SDRAM from other PLL port
+								 .sdram_clk_clk(DRAM_CLK),			//  clock out to SDRAM from other PLL port
+								 
+								 .sram_wire_DQ(SRAM_DQ),           //       sram_wire.DQ
+		                   .sram_wire_ADDR(SRAM_ADDR),         //                .ADDR
+		                   .sram_wire_LB_N(SRAM_LB_N),         //                .LB_N
+		                   .sram_wire_UB_N(SRAM_UB_N),         //                .UB_N
+		                   .sram_wire_CE_N(SRAM_CE_N),         //                .CE_N
+		                   .sram_wire_OE_N(SRAM_OE_N),         //                .OE_N
+		                   .sram_wire_WE_N(SRAM_WE_N),        //                .WE_N
+								 
+								 .vga_CLK(VGA_CLK),                //             vga.CLK
+                         .vga_HS(VGA_HS),                 //                .HS
+.vga_VS(VGA_VS),                 //                .VS
+.vga_BLANK(VGA_BLANK_N),              //                .BLANK
+.vga_SYNC(VGA_SYNC_N),               //                .SYNC
+.vga_R(VGA_R),                  //                .R
+.vga_G(VGA_G),                  //                .G
+.vga_B(VGA_B)                   //                .B
 								 );
 								 
 								 

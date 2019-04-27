@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'final385_soc'
  * SOPC Builder design path: ../../final385_soc.sopcinfo
  *
- * Generated: Sun Apr 21 21:14:21 CDT 2019
+ * Generated: Sat Apr 27 00:48:05 CDT 2019
  */
 
 /*
@@ -61,6 +61,7 @@
 #include "altera_nios2_gen2_irq.h"
 #include "altera_avalon_jtag_uart.h"
 #include "altera_avalon_sysid_qsys.h"
+#include "altera_up_avalon_video_pixel_buffer_dma.h"
 
 /*
  * Allocate the device storage
@@ -69,6 +70,7 @@
 ALTERA_NIOS2_GEN2_IRQ_INSTANCE ( NIOS2_GEN2_0, nios2_gen2_0);
 ALTERA_AVALON_JTAG_UART_INSTANCE ( JTAG_UART_0, jtag_uart_0);
 ALTERA_AVALON_SYSID_QSYS_INSTANCE ( SYSID_QSYS_0, sysid_qsys_0);
+ALTERA_UP_AVALON_VIDEO_PIXEL_BUFFER_DMA_INSTANCE ( VIDEO_PIXEL_BUFFER_DMA_0, video_pixel_buffer_dma_0);
 
 /*
  * Initialize the interrupt controller devices
@@ -93,4 +95,5 @@ void alt_sys_init( void )
 {
     ALTERA_AVALON_JTAG_UART_INIT ( JTAG_UART_0, jtag_uart_0);
     ALTERA_AVALON_SYSID_QSYS_INIT ( SYSID_QSYS_0, sysid_qsys_0);
+    ALTERA_UP_AVALON_VIDEO_PIXEL_BUFFER_DMA_INIT ( VIDEO_PIXEL_BUFFER_DMA_0, video_pixel_buffer_dma_0);
 }

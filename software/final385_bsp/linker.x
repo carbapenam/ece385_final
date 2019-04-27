@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'final385_soc'
  * SOPC Builder design path: ../../final385_soc.sopcinfo
  *
- * Generated: Sun Apr 21 21:14:21 CDT 2019
+ * Generated: Sat Apr 27 03:38:19 CDT 2019
  */
 
 /*
@@ -50,9 +50,9 @@
 
 MEMORY
 {
-    onchip_memory2_0 : ORIGIN = 0x0, LENGTH = 16
-    reset : ORIGIN = 0x10000000, LENGTH = 32
-    sdram : ORIGIN = 0x10000020, LENGTH = 134217696
+    reset : ORIGIN = 0x0, LENGTH = 32
+    onchip_memory2_0 : ORIGIN = 0x20, LENGTH = 131040
+    sdram : ORIGIN = 0x10000000, LENGTH = 134217728
 }
 
 /* Define symbols for each memory base-address */
@@ -113,7 +113,7 @@ SECTIONS
         KEEP (*(.exceptions.exit));
         KEEP (*(.exceptions));
         PROVIDE (__ram_exceptions_end = ABSOLUTE(.));
-    } > sdram
+    } > onchip_memory2_0
 
     PROVIDE (__flash_exceptions_start = LOADADDR(.exceptions));
 
@@ -209,7 +209,7 @@ SECTIONS
         PROVIDE (__DTOR_END__ = ABSOLUTE(.));
         KEEP (*(.jcr))
         . = ALIGN(4);
-    } > sdram = 0x3a880100 /* NOP instruction (always in big-endian byte ordering) */
+    } > onchip_memory2_0 = 0x3a880100 /* NOP instruction (always in big-endian byte ordering) */
 
     .rodata :
     {
@@ -219,7 +219,7 @@ SECTIONS
         *(.rodata1)
         . = ALIGN(4);
         PROVIDE (__ram_rodata_end = ABSOLUTE(.));
-    } > sdram
+    } > onchip_memory2_0
 
     PROVIDE (__flash_rodata_start = LOADADDR(.rodata));
 
@@ -253,7 +253,7 @@ SECTIONS
         _edata = ABSOLUTE(.);
         PROVIDE (edata = ABSOLUTE(.));
         PROVIDE (__ram_rwdata_end = ABSOLUTE(.));
-    } > sdram
+    } > onchip_memory2_0
 
     PROVIDE (__flash_rwdata_start = LOADADDR(.rwdata));
 
@@ -284,7 +284,7 @@ SECTIONS
 
         . = ALIGN(4);
         __bss_end = ABSOLUTE(.);
-    } > sdram
+    } > onchip_memory2_0
 
     /*
      *
@@ -309,12 +309,15 @@ SECTIONS
      *
      */
 
-    .onchip_memory2_0 : AT ( LOADADDR (.bss) + SIZEOF (.bss) )
+    .onchip_memory2_0 LOADADDR (.bss) + SIZEOF (.bss) : AT ( LOADADDR (.bss) + SIZEOF (.bss) )
     {
         PROVIDE (_alt_partition_onchip_memory2_0_start = ABSOLUTE(.));
         *(.onchip_memory2_0 .onchip_memory2_0. onchip_memory2_0.*)
         . = ALIGN(4);
         PROVIDE (_alt_partition_onchip_memory2_0_end = ABSOLUTE(.));
+        _end = ABSOLUTE(.);
+        end = ABSOLUTE(.);
+        __alt_stack_base = ABSOLUTE(.);
     } > onchip_memory2_0
 
     PROVIDE (_alt_partition_onchip_memory2_0_load_addr = LOADADDR(.onchip_memory2_0));
@@ -326,15 +329,12 @@ SECTIONS
      *
      */
 
-    .sdram LOADADDR (.onchip_memory2_0) + SIZEOF (.onchip_memory2_0) : AT ( LOADADDR (.onchip_memory2_0) + SIZEOF (.onchip_memory2_0) )
+    .sdram : AT ( LOADADDR (.onchip_memory2_0) + SIZEOF (.onchip_memory2_0) )
     {
         PROVIDE (_alt_partition_sdram_start = ABSOLUTE(.));
         *(.sdram .sdram. sdram.*)
         . = ALIGN(4);
         PROVIDE (_alt_partition_sdram_end = ABSOLUTE(.));
-        _end = ABSOLUTE(.);
-        end = ABSOLUTE(.);
-        __alt_stack_base = ABSOLUTE(.);
     } > sdram
 
     PROVIDE (_alt_partition_sdram_load_addr = LOADADDR(.sdram));
@@ -386,7 +386,7 @@ SECTIONS
 /*
  * Don't override this, override the __alt_stack_* symbols instead.
  */
-__alt_data_end = 0x18000000;
+__alt_data_end = 0x20000;
 
 /*
  * The next two symbols define the location of the default stack.  You can
@@ -402,4 +402,4 @@ PROVIDE( __alt_stack_limit   = __alt_stack_base );
  * Override this symbol to put the heap in a different memory.
  */
 PROVIDE( __alt_heap_start    = end );
-PROVIDE( __alt_heap_limit    = 0x18000000 );
+PROVIDE( __alt_heap_limit    = 0x20000 );

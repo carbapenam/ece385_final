@@ -1,22 +1,11 @@
-/************************************************************************
-Avalon-MM Interface for AES Decryption IP Core
-
+/*
+Based on Avalon-MM Interface for AES Decryption IP Core by 
 Dong Kai Wang, Fall 2017
 
 For use with ECE 385 Experiment 9
 University of Illinois ECE Department
+*/
 
-Register Map:
-
- 0-3 : 4x 32bit AES Key
- 4-7 : 4x 32bit AES Encrypted Message
- 8-11: 4x 32bit AES Decrypted Message
-   12: Not Used
-	13: Not Used
-   14: 32bit Start Register
-   15: 32bit Done Register
-
-************************************************************************/
 module avalon_vga_interface (
 	// Avalon Clock Input
 	input logic CLK,
@@ -37,12 +26,18 @@ module avalon_vga_interface (
 	output wire [31:0] EXPORT_DATA		// Exported Conduit Signals to VGA DACs
 );
 
+//Todo:
+// If the buffer is set to 0, then write the images to 1 and output images from 0.
+// If the buffer is set to 1, then write the images to 0 and output images from 1.
+
+
 // Register map for R, G, B
 // 0 - Red
 // 1 - Green
 // 2 - Blue
 // 3 - DrawX
 // 4 - DrawY
+// 5 - Buffer_Number
 
 logic [31:0] reg_file[5];
 
@@ -54,7 +49,7 @@ logic VGA_CLK,      //VGA Clock
 logic [9:0]DrawX, DrawY;
 		
 logic [7:0] R_out, G_out, B_out;
-		
+	
 
 //Ignore Byte Enable hahaha.
 always_ff @ (posedge CLK)
@@ -135,5 +130,7 @@ assign EXPORT_DATA = {3'b0,
 
 */							 
 assign AVL_READDATA = (AVL_READ && AVL_CS) ? reg_file[AVL_ADDR] : 32'b0;
+
+
 
 endmodule
