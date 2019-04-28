@@ -1,4 +1,4 @@
-void keyboard(){
+alt_u16 keyboard(){
 	IO_init();
 
 	/*while(1)
@@ -524,5 +524,5 @@ void keyboard(){
 
 	}//end while
 
-	return 0;
+	return code;
 }
