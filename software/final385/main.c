@@ -18,9 +18,16 @@
 
 #define pi 3.14159
 
+#define SIZE
+
 volatile alt_u32 *SDRAM_PTR = SDRAM_BASE;
 
 void keyboard();
+
+static int scene_id;
+int background_id[SIZE] = {};
+int character_id[SIZE] = {};
+int text_id[SIZE] = {};
 
 int main()
 {
