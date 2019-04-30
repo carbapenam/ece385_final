@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-char script[100][80] = {
+/*char script[100][80] = {
 
 "I don¡¯t know what T.S. Eliot meant when he said ¡°April is the cruelest month¡± or what made him say that, but I do know for a fact that April is the cruelest month",
 "On April 1st, Lab 10 was posted by the TAs as a cute joke. This lab required us to implement deep learning from scratch. We all chuckled at the impossibility and glanced through the lab page to join the festivity of April fools.",
@@ -22,4 +22,4 @@ char script[100][80] = {
 "That means that Shenyi wouldn¡¯t be going to Swiss grad school and I would have to turn down on my offers.",
 "She comes through the front door."
 
-};
+}; */

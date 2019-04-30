@@ -18,7 +18,7 @@
 #include "lcp_cmd.h"
 #include "lcp_data.h"
 #include "keyboard.h" //keyboard routine
-#include "script.c" //stores the script
+//#include "script.c" //stores the script
 
 #define pi 3.14159
 
@@ -106,7 +106,7 @@ int main()
 	//draw text
 	text_id = texts[scene_id];
 	char cur_text[100];
-	strcpy(cur_text, script[text_id]);
+	//strcpy(cur_text, script[text_id]);
 	display_text(cur_text, SDRAM_PTR);
 	//read from keyboard
 	alt_u16 keycode = keyboard();
