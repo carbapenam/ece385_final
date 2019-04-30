@@ -1,3 +1,23 @@
+#include "system.h"
+#include "alt_types.h"
+#include <unistd.h>  // usleep
+#include "sys/alt_irq.h"
+#include "altera_up_avalon_video_pixel_buffer_dma.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <io.h>
+#include <fcntl.h>
+#include <string.h>
+
+#include "io_handler.h"
+#include "cy7c67200.h"
+#include "usb.h"
+#include "lcp_cmd.h"
+#include "lcp_data.h"
+
+
 alt_u16 keyboard(){
 	IO_init();
 

@@ -7,22 +7,34 @@
 
 #include <string.h>
 
+#include "system.h"
+#include "alt_types.h"
+#include <unistd.h>  // usleep
+#include "sys/alt_irq.h"
+#include "altera_up_avalon_video_pixel_buffer_dma.h"
+
+
 #define SPRITE_BASE_ADDR 0  //the address the spritesheet is stored
+
+
 
 //font spritesheet is 10 x 10 and 24 x 24 for each font, whole pic size is 256 * 256
 
-void display_font(string text){
+void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 	int pos_x = 0;
 	int pos_y = 360;
 	int x, y;
-	for (int i = 0; i < text.length(); i++){
-		char cur = text[i]; //cur contains the current character to be displayed
+	int i = 0;
+	alt_up_pixel_buffer_dma_dev * pixel_buf_dev;
+	char cur = text[i];//cur contains the current character to be displayed
+
+	while (cur!='\0'){
 		int index = cur - ' ';
 		int sprite_x = index % 10;
 		int sprite_y = index / 10;
 		for (int row = 0; x < 24; x++)
 			for (int col = 0; y < 24; y++){
-				address =(sprite_y + row) * 256 + sprite_x + col;
+				int address =(sprite_y + row) * 256 + sprite_x + col;
 				alt_u32 data = SDRAM_PTR[SPRITE_BASE_ADDR+address];
 				alt_u16 color = (data | 0xFFFF00) >> 16;
 				x = pos_x + col;
@@ -30,5 +42,14 @@ void display_font(string text){
 				alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
 			}
 		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
+		pos_x = pos_x + 24;
+		if (pos_x >= 640){
+			pos_x = 0;
+			pos_y = 360 + 25;
+		}
+		if (pos_x >= 640 && pos_y >= 480)
+			return;
+		i++;
+		cur = text[i];
 	}
 }
