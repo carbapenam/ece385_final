@@ -13,30 +13,29 @@
 
 #include "io_handler.h"
 #include "cy7c67200.h"
+#include "helper_functions.h" //display given text on screen
 #include "usb.h"
 #include "lcp_cmd.h"
 #include "lcp_data.h"
 #include "keyboard.h" //keyboard routine
-#include "helper_funcions.h" //display given text on screen
 #include "script.c" //stores the script
 
 #define pi 3.14159
 
-#define SIZE 10
-#define CHOICE1_ID 5
-#define CHOICE2_ID 10
-#define GOOD_ENDING 20
-#define BAD_ENDING1 25
-#define BAD_ENDING2 30
+#define SIZE 50
+#define CHOICE1_ID 11
+#define CHOICE2_ID 21
+#define BAD_ENDING1 0
+#define BAD_ENDING2 0
 
 
 volatile alt_u32 *SDRAM_PTR = SDRAM_BASE;
 
 static int scene_id = 0;
-int backgrounds[SIZE] = {0, 1, 2};
-int characters1[SIZE] = {0};
-int characters2[SIZE] = {0};
-int texts[SIZE] = {0};
+int backgrounds[SIZE] = {-1, 1, 2, 3, 4,-1};
+int characters1[SIZE] = {-1,-1,-1,-1,-1, 1};
+int characters2[SIZE] = {-1,-1,-1,-1,-1,-1};
+int texts[SIZE] = {0, 1, 2, 5, 7, 11};
 static int text_id = 0; //count the texts in a single scene
 
 int main()
@@ -58,19 +57,21 @@ int main()
 	int address = 0;
 
 	//draw background
-	int bg_addr = backgrounds[scene_id]; //address of the background
-	for (y=0; y<480; y++)
-	{
-		for (x =0; x<640; x++)
+	if (backgrounds[scene_id]!= -1){
+		int bg_addr = backgrounds[scene_id]; //address of the background
+		for (y=0; y<480; y++)
 		{
-			address = bg_addr + x + 640*y;
-			alt_u32 data = SDRAM_PTR[address];
-			alt_u16 color = (data | 0xFFFF00) >> 16;
-			//printf("%d, %d, %x, %x\n", x,y,data,color);
-			alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
+			for (x =0; x<640; x++)
+			{
+				address = bg_addr + x + 640*y;
+				alt_u32 data = SDRAM_PTR[address];
+				alt_u16 color = (data | 0xFFFF00) >> 16;
+				//printf("%d, %d, %x, %x\n", x,y,data,color);
+				alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
+			}
 		}
+		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
 	}
-	alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
 
 	//draw 1st character
 	if (characters1[scene_id] != -1){
@@ -102,7 +103,9 @@ int main()
 		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
 	}
 
-	char cur_text[10];
+	//draw text
+	text_id = texts[scene_id];
+	char cur_text[100];
 	strcpy(cur_text, script[text_id]);
 	display_text(cur_text, SDRAM_PTR);
 	//read from keyboard
@@ -118,7 +121,7 @@ int main()
 	}
 	else if (scene_id == CHOICE2_ID){ //check for 2nd choosing scene
 		if (keycode == 'a')   // a is the good choice
-			scene_id = GOOD_ENDING;
+			scene_id++;
 		if (keycode == 'b')
 			scene_id = BAD_ENDING2;
 	}
