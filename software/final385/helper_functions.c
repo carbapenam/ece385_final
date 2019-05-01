@@ -29,12 +29,17 @@ void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 	char cur = text[i];//cur contains the current character to be displayed
 
 	while (cur!='\0'){
+		if (cur == '\n'){
+			pos_y = pos_y + 25;
+			pos_x = 0;
+			continue;
+		}
 		int index = cur - ' ';
 		int sprite_x = index % 10;
 		int sprite_y = index / 10;
 		for (int row = 0; x < 24; x++)
 			for (int col = 0; y < 24; y++){
-				int address =(sprite_y + row) * 256 + sprite_x + col;
+				int address =(sprite_y + row) * 256 + sprite_x * 24 + col;
 				alt_u32 data = SDRAM_PTR[SPRITE_BASE_ADDR+address];
 				alt_u16 color = (data | 0xFFFF00) >> 16;
 				x = pos_x + col;
@@ -43,10 +48,10 @@ void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 			}
 		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
 		pos_x = pos_x + 24;
-		if (pos_x >= 640){
+		/*if (pos_x >= 640){
 			pos_x = 0;
-			pos_y = 360 + 25;
-		}
+			pos_y = pos_y + 25;
+		}*/
 		if (pos_x >= 640 && pos_y >= 480)
 			return;
 		i++;
