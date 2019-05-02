@@ -289,8 +289,8 @@ void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 			continue;
 		}
 		int index = cur - ' ';
-		int sprite_x = index % 10;
-		int sprite_y = index / 10;
+		int sprite_x = index % 16;
+		int sprite_y = index / 16;
 		for (int row = 0; x < 16; x++)
 			for (int col = 0; y < 16; y++){
 				int address =(sprite_y + row) * WIDTH_OF_SPRITESHEET + sprite_x * 16 + col;
