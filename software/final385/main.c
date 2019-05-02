@@ -134,8 +134,8 @@ int main()
 	}
 
 	//read from keyboard
-	alt_u16 keycode = keyboard();
-	printf("\ncode = %x\n", keycode);
+	int keycode = keyboard();
+	printf("\nkey = %d\n", keycode);
 
 	//update scene id based on keycode
 	if (scene_id == CHOICE1_ID){  //check for 1st choosing scene
