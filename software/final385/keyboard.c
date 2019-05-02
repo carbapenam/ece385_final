@@ -452,7 +452,7 @@ alt_u16 keyboard(){
 
 	//-----------------------------------get keycode value------------------------------------------------//
 	usleep(10000);
-	while(1)
+	while(keycode!=0)
 	{
 		toggle++;
 		IO_write(HPI_ADDR,0x0500); //the start address
@@ -544,5 +544,5 @@ alt_u16 keyboard(){
 
 	}//end while
 
-	return code;
+	return keycode;
 }
