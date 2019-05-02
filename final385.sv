@@ -32,11 +32,20 @@ module final385  ( input	       CLOCK_50,
 		            output        SRAM_UB_N,         //                .UB_N
 		            output        SRAM_CE_N,         //                .CE_N
 		            output        SRAM_OE_N,         //                .OE_N
-		            output        SRAM_WE_N          //                .WE_N
-);
+		            output        SRAM_WE_N,          //                .WE_N
+             
+				 // CY7C67200 Interface
+             inout  wire  [15:0] OTG_DATA,     //CY7C67200 Data bus 16 Bits
+             output logic [1:0]  OTG_ADDR,     //CY7C67200 Address 2 Bits
+             output logic        OTG_CS_N,     //CY7C67200 Chip Select
+                                 OTG_RD_N,     //CY7C67200 Write
+                                 OTG_WR_N,     //CY7C67200 Read
+                                 OTG_RST_N,    //CY7C67200 Reset
+             input               OTG_INT      //CY7C67200 Interrupt
+						);
 
 	 logic Reset_h, Clk;
-	 //logic [7:0] keycode;
+	 logic [7:0] keycode;
 	 
 	 assign Clk = CLOCK_50;
  
@@ -45,7 +54,33 @@ module final385  ( input	       CLOCK_50,
 		  Reset_h <= ~(KEY[0]);        // The push buttons are active low
 	 end	
 
-	  // You need to make sure that the port names here are identical to the port names at 
+    logic [1:0] hpi_addr;
+    logic [15:0] hpi_data_in, hpi_data_out;
+    logic hpi_r, hpi_w, hpi_cs, hpi_reset;
+    
+    // Interface between NIOS II and EZ-OTG chip
+    hpi_io_intf hpi_io_inst(
+                            .Clk(Clk),
+                            .Reset(Reset_h),
+                            // signals connected to NIOS II
+                            .from_sw_address(hpi_addr),
+                            .from_sw_data_in(hpi_data_in),
+                            .from_sw_data_out(hpi_data_out),
+                            .from_sw_r(hpi_r),
+                            .from_sw_w(hpi_w),
+                            .from_sw_cs(hpi_cs),
+                            .from_sw_reset(hpi_reset),
+                            // signals connected to EZ-OTG chip
+                            .OTG_DATA(OTG_DATA),    
+                            .OTG_ADDR(OTG_ADDR),    
+                            .OTG_RD_N(OTG_RD_N),    
+                            .OTG_WR_N(OTG_WR_N),    
+                            .OTG_CS_N(OTG_CS_N),
+                            .OTG_RST_N(OTG_RST_N)
+    );	 
+	 
+	
+	// You need to make sure that the port names here are identical to the port names at 
 	  // the interface in lab7_soc.v
 	  final385_soc final385_soc_instance(.clk_clk(CLOCK_50),
 								 .reset_reset_n(KEY[0]), 
@@ -59,6 +94,15 @@ module final385  ( input	       CLOCK_50,
 								 .sdram_wire_ras_n(DRAM_RAS_N),    //  .ras_n
 								 .sdram_wire_we_n(DRAM_WE_N),      //  .we_n
 								 .sdram_clk_clk(DRAM_CLK),			//  clock out to SDRAM from other PLL port
+
+                             .keycode_export(keycode),  
+                             .otg_hpi_address_export(hpi_addr),
+                             .otg_hpi_data_in_port(hpi_data_in),
+                             .otg_hpi_data_out_port(hpi_data_out),
+                             .otg_hpi_cs_export(hpi_cs),
+                             .otg_hpi_r_export(hpi_r),
+                             .otg_hpi_w_export(hpi_w),
+                             .otg_hpi_reset_export(hpi_reset),
 								 
 								 .sram_wire_DQ(SRAM_DQ),           //       sram_wire.DQ
 		                   .sram_wire_ADDR(SRAM_ADDR),         //                .ADDR
