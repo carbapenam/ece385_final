@@ -38,7 +38,6 @@ extern alt_u8 n_font;
 extern alt_u8 n_text;
 
 alt_u16 offset;
-
 //int backgrounds[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //address for each bg
 //int characters[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};//address for each character
 
@@ -47,8 +46,6 @@ static int scene_id = 0;
 int main()
 {
 	int x, y;
-	int current_buffer = 0;
-
 	alt_up_pixel_buffer_dma_dev * pixel_buf_dev;
 
 	// open the Pixel Buffer port
@@ -66,7 +63,7 @@ int main()
 	init_scenes();
 	offset = populate_structs();
 	printf("memory offset: %d\n", offset);
-	//test_assets(addr);
+	test_assets(offset);
 
 	printf("loop begins\n");
 
@@ -122,11 +119,12 @@ int main()
 
 	char cur_text[100];
 	while (text_count < text_end && text_count != -1){
-		copy_str(cur_text, SDRAM_PTR + texts[text_count].address + offset, texts[text_count].length);
+		printf("text_address: %d, offset: %d\n", texts[text_count].address, offset);
+		copy_str(&cur_text[0], SDRAM_PTR + texts[text_count].address + offset, texts[text_count].length);
 		printf("%s\n", cur_text);
 		//read the text[text_count] into cur_text
 		//need to be done
-		display_text(cur_text, SDRAM_PTR);
+		display_text(cur_text, font.address + offset);
 		alt_u16 keycode = keyboard();
 		//printf("\ncode = %x\n", keycode);
 		if (keycode!= 0)

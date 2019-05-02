@@ -14,25 +14,34 @@
 #include "helper_functions.h"
 #include <stdio.h>
 
-#define SPRITE_BASE_ADDR 0  //the address the spritesheet is stored
-
 #define WIDTH_OF_SPRITESHEET 256
 
 void copy_str(char* dest, alt_u32 *src, int length_in_32_bits)
 {
 	int i = 0;
-	char* current = dest;
+	char *current_dest = dest;
+	alt_u32 *current_src = src;
+	printf("%d\n", current_src);
 	while(i < length_in_32_bits)
 	{
-		*(current) = *src & (0x000000FF);
-		*(current+1) = *src & (0x0000FF00) >> 8;
-		*(current+2) = *src & (0x00FF0000) >> 16;
-		*(current+3) = *src & (0xFF000000) >> 24;
+		*(current_dest) = (char) (*(current_src) & 0x000000FF);
+		*(current_dest+1) = (char) (*(current_src) & 0x0000FF00) >> 8;
+		*(current_dest+2) = (char) (*(current_src) & 0x00FF0000) >> 16;
+		*(current_dest+3) = (char) (*(current_src) & 0xFF000000) >> 24;
+
+
+		printf("content at %p: %d\n", current_src, *current_src);
+		//printf("%p, %p\n", current_dest, current_src);
+		//printf("%s", current_dest);
+		//printf("%s", (current_dest+1));
+		//printf("%s", (current_dest+2));
+		//printf("%s", (current_dest+3));
+
+		current_src += 1;
+		current_dest += 4;
 		i++;
-		current += 4;
 	}
 }
-
 void test_assets(int offset)
 {
 	alt_u32 *SDRAM_PTR = SDRAM_BASE;
@@ -51,7 +60,7 @@ void test_assets(int offset)
 	printf("cleared screen\n");
 	printf("offset: %d\n", offset);
 	printf("n_backgrounds : %d\n", n_background);
-
+/*
 	for (int i=0; i<n_background; i++)
 	{
 		int width, height;
@@ -120,12 +129,14 @@ void test_assets(int offset)
 		break;
 	}
 
-	/*
+	*/
 	for (int i=0; i<n_text; i++)
 	{
-		memcpy()
-		printf("%d: %s\n", i, SDRAM_PTR+offset+texts[i].address]);
-	}*/
+		for (int j=0; j<texts[i].length;j++)
+		{
+			printf("%d: %x\n", i, *(SDRAM_PTR+offset+texts[i].address+j));
+		}
+	}
 }
 
 alt_u32 populate_structs()
@@ -274,12 +285,14 @@ alt_u32 populate_structs()
 
 //font spritesheet is 10 x 10 and 24 x 24 for each font, whole pic size is 256 * 256
 
-void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
+void display_text(char text[], volatile alt_u32 *FONT_BASE_ADDRESS){
 	int pos_x = 0;
 	int pos_y = 360;
 	int x, y;
 	int i = 0;
 	alt_up_pixel_buffer_dma_dev * pixel_buf_dev;
+	pixel_buf_dev = alt_up_pixel_buffer_dma_open_dev ("/dev/video_pixel_buffer_dma_0");
+
 	char cur = text[i];//cur contains the current character to be displayed
 
 	while (cur!='\0'){
@@ -293,8 +306,8 @@ void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 		int sprite_y = index / 16;
 		for (int row = 0; x < 16; x++)
 			for (int col = 0; y < 16; y++){
-				int address =(sprite_y + row) * WIDTH_OF_SPRITESHEET + sprite_x * 16 + col;
-				alt_u32 data = SDRAM_PTR[SPRITE_BASE_ADDR+address];
+				int address = (sprite_y + row) * WIDTH_OF_SPRITESHEET + sprite_x * 16 + col;
+				alt_u32 data = *FONT_BASE_ADDRESS + address;
 				alt_u16 color = (data & 0xFFFF0000) >> 16;
 				alt_u8 alpha = (data & 0x0000FF00) >> 8;
 				if (alpha == 0) continue;

@@ -10,7 +10,8 @@
 
 void test_assets(int offset);
 alt_u32 populate_structs();
-void display_text(char text[], volatile alt_u32 * SDRAM_PTR);
+void display_text(char text[], volatile alt_u32 *FONT_BASE_ADDRESS);
+void copy_str(char* dest, alt_u32 *src, int length_in_32_bits);
 
 static alt_u8 n_background = 0;
 static alt_u8 n_chara = 0;
