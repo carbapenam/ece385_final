@@ -145,6 +145,9 @@ ELF := final385.elf
 C_SRCS += main.c
 C_SRCS += io_handler.c
 C_SRCS += usb.c
+C_SRCS += helper_functions.c
+C_SRCS += keyboard.c
+C_SRCS += script.c
 CXX_SRCS :=
 ASM_SRCS :=
 

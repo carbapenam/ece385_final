@@ -6,20 +6,271 @@
  */
 
 #include <string.h>
-
 #include "system.h"
 #include "alt_types.h"
 #include <unistd.h>  // usleep
 #include "sys/alt_irq.h"
 #include "altera_up_avalon_video_pixel_buffer_dma.h"
 #include "helper_functions.h"
-
+#include <stdio.h>
 
 #define SPRITE_BASE_ADDR 0  //the address the spritesheet is stored
 
 #define WIDTH_OF_SPRITESHEET 256
 
+void copy_str(char* dest, alt_u32 *src, int length_in_32_bits)
+{
+	int i = 0;
+	char* current = dest;
+	while(i < length_in_32_bits)
+	{
+		*(current) = *src & (0x000000FF);
+		*(current+1) = *src & (0x0000FF00) >> 8;
+		*(current+2) = *src & (0x00FF0000) >> 16;
+		*(current+3) = *src & (0xFF000000) >> 24;
+		i++;
+		current += 4;
+	}
+}
 
+void test_assets(int offset)
+{
+	alt_u32 *SDRAM_PTR = SDRAM_BASE;
+	alt_up_pixel_buffer_dma_dev * pixel_buf_dev;
+
+	// open the Pixel Buffer port
+	pixel_buf_dev = alt_up_pixel_buffer_dma_open_dev ("/dev/video_pixel_buffer_dma_0");
+	if ( pixel_buf_dev == NULL)
+		printf ("Error: could not open pixel buffer device \n");
+	else
+		printf ("Opened pixel buffer device \n");
+
+	/* Clear the screen */
+	alt_up_pixel_buffer_dma_clear_screen (pixel_buf_dev,0);
+	alt_up_pixel_buffer_dma_clear_screen (pixel_buf_dev,1);
+	printf("cleared screen\n");
+	printf("offset: %d\n", offset);
+	printf("n_backgrounds : %d\n", n_background);
+
+	for (int i=0; i<n_background; i++)
+	{
+		int width, height;
+		alt_u32 addr;
+
+		width = backgrounds[i].width;
+		height = backgrounds[i].height;
+		addr = backgrounds[i].address;
+		printf("drawing an background by %d x %d at %d\n", width, height, addr);
+		for(int y=0; y<height; y++)
+		{
+			for (int x=0; x<width; x++)
+			{
+				alt_u32 data = SDRAM_PTR[offset + addr + (width*y) + x];
+				alt_u16 color = (data & 0xFFFF0000) >> 16;
+				//printf("color: %x\n",color);
+				alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
+			}
+		}
+
+		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
+	}
+
+	for (int i=0; i<n_chara; i++)
+	{
+		int width, height;
+		alt_u32 addr;
+
+		width = charas[i].width;
+		height = charas[i].height;
+		addr = charas[i].address;
+		printf("drawing a character by %d x %d at %d\n", width, height, addr);
+		for(int y=0; y<height; y++)
+		{
+			for (int x=0; x<width; x++)
+			{
+				alt_u32 data = SDRAM_PTR[offset + addr + (width*y) + x];
+				alt_u16 color = (data & 0xFFFF0000) >> 16;
+				alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
+			}
+		}
+		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
+		alt_up_pixel_buffer_dma_clear_screen (pixel_buf_dev,1);
+
+	}
+
+	while(1)
+	{
+		int width, height;
+		alt_u32 addr;
+
+		width = font.width;
+		height = font.height;
+		addr = font.address;
+		printf("drawing an font by %d x %d at %d\n", width, height, addr);
+		for(int y=0; y<height; y++)
+		{
+			for (int x=0; x<width; x++)
+			{
+				alt_u32 data = SDRAM_PTR[offset + addr + (width*y) + x];
+				alt_u16 color = (data & 0xFFFF0000) >> 16;
+				alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
+			}
+		}
+		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
+		break;
+	}
+
+	/*
+	for (int i=0; i<n_text; i++)
+	{
+		memcpy()
+		printf("%d: %s\n", i, SDRAM_PTR+offset+texts[i].address]);
+	}*/
+}
+
+alt_u32 populate_structs()
+{
+	//Reset the counter for assets.
+
+	n_background = 0;
+	n_chara = 0;
+	n_font = 0;
+	n_text = 0;
+
+	alt_u32 content = 0;
+	alt_u32 addr = 0;
+
+	alt_u32 *SDRAM_PTR = SDRAM_BASE;
+
+	//Start with just reading the sdram
+	char reading_mode = 0;
+
+	while (1)
+	{
+		content = SDRAM_PTR[addr];
+		//printf("%x", content);
+
+		if ((char) content == 'D')
+		{
+			printf("Reached the end of the memory.\n");
+			addr++;
+			return addr;
+			break;
+		}
+
+		if ((char) content == 'B')
+		{
+			printf("Populating background\n");
+			reading_mode = 'B';
+			addr++;
+			continue;
+		}
+
+		if ((char) content == 'C')
+		{
+			printf("Populating character\n");
+			reading_mode = 'C';
+			addr++;
+			continue;
+		}
+
+		if ((char) content == 'F')
+		{
+			printf("Populating font\n");
+			reading_mode = 'F';
+			addr++;
+			continue;
+		}
+
+		if ((char) content == 'T')
+		{
+			printf("Populating text\n");
+			reading_mode = 'T';
+			addr++;
+			continue;
+		}
+
+		switch (reading_mode)
+		{
+			case 'B':
+				content = SDRAM_PTR[addr];
+				backgrounds[n_background].width = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+1];
+				backgrounds[n_background].height = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+2];
+				backgrounds[n_background].address = content;
+
+				printf("read a background with %d x %d at %d\n", backgrounds[n_background].width,
+						backgrounds[n_background].height, backgrounds[n_background].address);
+
+				addr += 3;
+				n_background++;
+				break;
+
+			case 'C':
+				charas[n_chara].character_id = n_chara;
+
+				content = SDRAM_PTR[addr];
+				charas[n_chara].width = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+1];
+				charas[n_chara].height = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+2];
+				charas[n_chara].offset_x = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+3];
+				charas[n_chara].offset_y = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+4];
+				charas[n_chara].address = content;
+
+				printf("read a chara with %d x %d with offset (%d, %d) at %d\n", charas[n_chara].width,
+						charas[n_chara].height, charas[n_chara].offset_x, charas[n_chara].offset_y,
+						charas[n_chara].address);
+
+				addr += 5;
+				n_chara++;
+				break;
+
+			case 'F':
+				content = SDRAM_PTR[addr];
+				font.width = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+1];
+				font.height = (alt_u16) content;
+
+				content = SDRAM_PTR[addr+2];
+				font.address = content;
+
+				printf("read a font with %d x %d at %d\n", font.width,
+						font.height, font.address);
+
+				addr += 3;
+				break;
+
+			case 'T':
+				texts[n_text].text_id = n_text;
+
+				content = SDRAM_PTR[addr];
+				texts[n_text].length = (alt_u8) content;
+
+				content = SDRAM_PTR[addr+1];
+				texts[n_text].address = content;
+
+				printf("read a text that's %d long at %d\n", texts[n_text].length,
+							texts[n_text].address);
+
+				addr += 2;
+				n_text++;
+				break;
+		}
+	}
+
+	printf("data loading complete.\n");
+}
 
 //font spritesheet is 10 x 10 and 24 x 24 for each font, whole pic size is 256 * 256
 
@@ -32,7 +283,7 @@ void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 	char cur = text[i];//cur contains the current character to be displayed
 
 	while (cur!='\0'){
-		if (cur == '\n'){
+		if (cur == '^'){
 			pos_y = pos_y + 20;
 			pos_x = 0;
 			continue;
@@ -44,8 +295,8 @@ void display_text(char text[], volatile alt_u32 * SDRAM_PTR){
 			for (int col = 0; y < 16; y++){
 				int address =(sprite_y + row) * WIDTH_OF_SPRITESHEET + sprite_x * 16 + col;
 				alt_u32 data = SDRAM_PTR[SPRITE_BASE_ADDR+address];
-				alt_u16 color = (data | 0xFFFF0000) >> 16;
-				alt_u8 alpha = (data | 0x0000FF00) >> 8;
+				alt_u16 color = (data & 0xFFFF0000) >> 16;
+				alt_u8 alpha = (data & 0x0000FF00) >> 8;
 				if (alpha == 0) continue;
 				x = pos_x + col;
 				y = pos_y + row;
