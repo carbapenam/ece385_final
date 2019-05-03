@@ -21,21 +21,19 @@ void copy_str(char* dest, alt_u32 *src, int length_in_32_bits)
 	int i = 0;
 	char *current_dest = dest;
 	alt_u32 *current_src = src;
-	printf("%d\n", current_src);
+
+	// If tit's
 	while(i < length_in_32_bits)
 	{
-		*(current_dest) = (char) (*(current_src) & 0x000000FF);
-		*(current_dest+1) = (char) (*(current_src) & 0x0000FF00) >> 8;
-		*(current_dest+2) = (char) (*(current_src) & 0x00FF0000) >> 16;
-		*(current_dest+3) = (char) (*(current_src) & 0xFF000000) >> 24;
+		*(current_dest) = (*(current_src) & 0x000000FF);
+		*(current_dest+1) = (*(current_src) & 0x0000FF00) >> 8;
+		*(current_dest+2) = (*(current_src) & 0x00FF0000) >> 16;
+		*(current_dest+3) = (*(current_src) & 0xFF000000) >> 24;
 
-
-		printf("content at %p: %d\n", current_src, *current_src);
+		//printf("content at %p: %x\n", current_src, *current_src);
 		//printf("%p, %p\n", current_dest, current_src);
-		//printf("%s", current_dest);
-		//printf("%s", (current_dest+1));
-		//printf("%s", (current_dest+2));
-		//printf("%s", (current_dest+3));
+		//printf("%c%c%c%c\n", *current_dest,*(current_dest+1),*(current_dest+2),*(current_dest+3));
+		//printf("\n");
 
 		current_src += 1;
 		current_dest += 4;
@@ -285,44 +283,51 @@ alt_u32 populate_structs()
 
 //font spritesheet is 10 x 10 and 24 x 24 for each font, whole pic size is 256 * 256
 
-void display_text(char text[], volatile alt_u32 *FONT_BASE_ADDRESS){
-	int pos_x = 0;
+void display_text(char text[], volatile alt_u32 *FONT_BASE_ADDRESS,
+		alt_up_pixel_buffer_dma_dev * pixel_buf_dev){
+	int pos_x = 5;
 	int pos_y = 360;
 	int x, y;
 	int i = 0;
-	alt_up_pixel_buffer_dma_dev * pixel_buf_dev;
-	pixel_buf_dev = alt_up_pixel_buffer_dma_open_dev ("/dev/video_pixel_buffer_dma_0");
 
 	char cur = text[i];//cur contains the current character to be displayed
 
 	while (cur!='\0'){
+		//printf("NOW drawing char: %c\n", cur);
 		if (cur == '^'){
 			pos_y = pos_y + 20;
-			pos_x = 0;
-			continue;
+			pos_x = 5;
+			i++;
+			cur = text[i];
 		}
-		int index = cur - ' ';
+		int index = (int)cur - 32;
+		//printf("index is %d\n", index);
 		int sprite_x = index % 16;
 		int sprite_y = index / 16;
-		for (int row = 0; x < 16; x++)
-			for (int col = 0; y < 16; y++){
-				int address = (sprite_y + row) * WIDTH_OF_SPRITESHEET + sprite_x * 16 + col;
-				alt_u32 data = *FONT_BASE_ADDRESS + address;
+		for (int row = 0; row < 16; row++){
+			for (int col = 0; col < 16; col++){
+				int address = (sprite_y*16 + row) * WIDTH_OF_SPRITESHEET + sprite_x * 16 + col;
+				alt_u32 data = *(FONT_BASE_ADDRESS + address);
 				alt_u16 color = (data & 0xFFFF0000) >> 16;
 				alt_u8 alpha = (data & 0x0000FF00) >> 8;
 				if (alpha == 0) continue;
 				x = pos_x + col;
 				y = pos_y + row;
+			//	printf("drawing to pixels x=%d, y=%d\n",x , y);
 				alt_up_pixel_buffer_dma_draw(pixel_buf_dev, color, x, y);
 			}
-		alt_up_pixel_buffer_dma_swap_buffers(pixel_buf_dev);
+		}
+		//printf( "%d, %d\n", pos_x, pos_y);
 		pos_x = pos_x + 16;
 		/*if (pos_x >= 640){
 			pos_x = 0;
 			pos_y = pos_y + 25;
 		}*/
 		if (pos_x >= 640 && pos_y >= 480)
+		{
 			return;
+			printf("escape!\n");
+		}
 		i++;
 		cur = text[i];
 	}
@@ -444,55 +449,55 @@ void init_scenes(){
 	scenes[18].text_id_end = 68;
 
 	scenes[19].scene_id = 19;
-	scenes[19].background_id = 3;
+	scenes[19].background_id = 4;
 	scenes[19].character_id = -1;
 	scenes[19].text_id_begin = 69;
 	scenes[19].text_id_end = 71;
 
 	scenes[20].scene_id = 20;
-	scenes[20].background_id = 3;
+	scenes[20].background_id = 4;
 	scenes[20].character_id = 3;
 	scenes[20].text_id_begin = 72;
 	scenes[20].text_id_end = 73;
 
 	scenes[21].scene_id = 21;
-	scenes[21].background_id = 3;
+	scenes[21].background_id = 4;
 	scenes[21].character_id = 3;
 	scenes[21].text_id_begin = 74;
 	scenes[21].text_id_end = 74;
 
 	scenes[22].scene_id = 22;
-	scenes[22].background_id = 3;
+	scenes[22].background_id = 4;
 	scenes[22].character_id = 3;
 	scenes[22].text_id_begin = 75;
 	scenes[22].text_id_end = 77;
 
 	scenes[23].scene_id = 23;
-	scenes[23].background_id = 3;
+	scenes[23].background_id = 4;
 	scenes[23].character_id = -1;
 	scenes[23].text_id_begin = 78;
 	scenes[23].text_id_end = 87;
 
 	scenes[24].scene_id = 24;
-	scenes[24].background_id = 3;
+	scenes[24].background_id = 4;
 	scenes[24].character_id = 4;
 	scenes[24].text_id_begin = 78;
 	scenes[24].text_id_end = 87;
 
 	scenes[25].scene_id = 25;
-	scenes[25].background_id = 3;
+	scenes[25].background_id = 4;
 	scenes[25].character_id = -1;
 	scenes[25].text_id_begin = 88;
 	scenes[25].text_id_end = 97;
 
 	scenes[26].scene_id = 26;
-	scenes[26].background_id = 3;
+	scenes[26].background_id = 4;
 	scenes[26].character_id = -1;
 	scenes[26].text_id_begin = 98;
 	scenes[26].text_id_end = 98;
 
 	scenes[27].scene_id = 27;
-	scenes[27].background_id = 3;
+	scenes[27].background_id = 4;
 	scenes[27].character_id = 5;
 	scenes[27].text_id_begin = 99;
 	scenes[27].text_id_end = 100;
@@ -564,31 +569,31 @@ void init_scenes(){
 	scenes[38].text_id_end = 129;
 
 	scenes[39].scene_id = 39;
-	scenes[39].background_id = 3;
+	scenes[39].background_id = 4;
 	scenes[39].character_id = 3;
 	scenes[39].text_id_begin = 130;
 	scenes[39].text_id_end = 130;
 
 	scenes[40].scene_id = 40;
-	scenes[40].background_id = 3;
+	scenes[40].background_id = 4;
 	scenes[40].character_id = 2;
 	scenes[40].text_id_begin = 131;
 	scenes[40].text_id_end = 133;
 
 	scenes[41].scene_id = 41;
-	scenes[41].background_id = 3;
+	scenes[41].background_id = 4;
 	scenes[41].character_id = -1;
 	scenes[41].text_id_begin = 134;
 	scenes[41].text_id_end = 136;
 
 	scenes[42].scene_id = 42;
-	scenes[42].background_id = 3;
+	scenes[42].background_id = 4;
 	scenes[42].character_id = 3;
 	scenes[42].text_id_begin = 137;
 	scenes[42].text_id_end = 139;
 
 	scenes[43].scene_id = 43;
-	scenes[43].background_id = 3;
+	scenes[43].background_id = 4;
 	scenes[43].character_id = -1;
 	scenes[43].text_id_begin = 140;
 	scenes[43].text_id_end = 141;
@@ -602,25 +607,25 @@ void init_scenes(){
 
 
 	scenes[45].scene_id = 45;
-	scenes[45].background_id = 3;
+	scenes[45].background_id = 4;
 	scenes[45].character_id = 1;
 	scenes[45].text_id_begin = 146;
 	scenes[45].text_id_end = 146;
 
 	scenes[46].scene_id = 46;
-	scenes[46].background_id = 3;
+	scenes[46].background_id = 4;
 	scenes[46].character_id = -1;
 	scenes[46].text_id_begin = 147;
 	scenes[46].text_id_end = 148;
 
 	scenes[47].scene_id = 47;
-	scenes[47].background_id = 3;
+	scenes[47].background_id = 4;
 	scenes[47].character_id = 1;
 	scenes[47].text_id_begin = 149;
 	scenes[47].text_id_end = 149;
 
 	scenes[48].scene_id = 48;
-	scenes[48].background_id = 3;
+	scenes[48].background_id = 4;
 	scenes[48].character_id = 1;
 	scenes[48].text_id_begin = 150;
 	scenes[48].text_id_end = 152;
@@ -632,31 +637,31 @@ void init_scenes(){
 	scenes[49].text_id_end = 154;
 
 	scenes[50].scene_id = 50;
-	scenes[50].background_id = 3;
+	scenes[50].background_id = 4;
 	scenes[50].character_id = -1;
 	scenes[50].text_id_begin = 155;
 	scenes[50].text_id_end = 155;
 
 	scenes[51].scene_id = 51;
-	scenes[51].background_id = 3;
+	scenes[51].background_id = 4;
 	scenes[51].character_id = 2;
 	scenes[51].text_id_begin = 156;
 	scenes[51].text_id_end = 157;
 
 	scenes[52].scene_id = 52;
-	scenes[52].background_id = 3;
+	scenes[52].background_id = 4;
 	scenes[52].character_id = -1;
 	scenes[52].text_id_begin = 158;
 	scenes[52].text_id_end = 158;
 
 	scenes[53].scene_id = 53;
-	scenes[53].background_id = 3;
+	scenes[53].background_id = 4;
 	scenes[53].character_id = 3;
 	scenes[53].text_id_begin = 159;
 	scenes[53].text_id_end = 159;
 
 	scenes[54].scene_id = 54;
-	scenes[54].background_id = 3;
+	scenes[54].background_id = 4;
 	scenes[54].character_id = -1;
 	scenes[54].text_id_begin = 160;
 	scenes[54].text_id_end = 160;

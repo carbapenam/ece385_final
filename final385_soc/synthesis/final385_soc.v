@@ -4,6 +4,7 @@
 
 `timescale 1 ps / 1 ps
 module final385_soc (
+		input  wire [3:0]  button0_export,         //         button0.export
 		input  wire        clk_clk,                //             clk.clk
 		output wire [7:0]  keycode_export,         //         keycode.export
 		output wire [1:0]  otg_hpi_address_export, // otg_hpi_address.export
@@ -164,14 +165,24 @@ module final385_soc (
 	wire   [1:0] mm_interconnect_0_otg_hpi_w_s1_address;                                     // mm_interconnect_0:otg_hpi_w_s1_address -> otg_hpi_w:address
 	wire         mm_interconnect_0_otg_hpi_w_s1_write;                                       // mm_interconnect_0:otg_hpi_w_s1_write -> otg_hpi_w:write_n
 	wire  [31:0] mm_interconnect_0_otg_hpi_w_s1_writedata;                                   // mm_interconnect_0:otg_hpi_w_s1_writedata -> otg_hpi_w:writedata
+	wire  [31:0] mm_interconnect_0_button0_s1_readdata;                                      // button0:readdata -> mm_interconnect_0:button0_s1_readdata
+	wire   [1:0] mm_interconnect_0_button0_s1_address;                                       // mm_interconnect_0:button0_s1_address -> button0:address
 	wire         irq_mapper_receiver0_irq;                                                   // jtag_uart_0:av_irq -> irq_mapper:receiver0_irq
 	wire  [31:0] nios2_gen2_0_irq_irq;                                                       // irq_mapper:sender_irq -> nios2_gen2_0:irq
-	wire         rst_controller_reset_out_reset;                                             // rst_controller:reset_out -> [jtag_uart_0:rst_n, keycode:reset_n, mm_interconnect_0:video_pixel_buffer_dma_0_reset_reset_bridge_in_reset_reset, otg_hpi_address:reset_n, otg_hpi_cs:reset_n, otg_hpi_data:reset_n, otg_hpi_r:reset_n, otg_hpi_reset:reset_n, otg_hpi_w:reset_n, sram_0:reset, video_dual_clock_buffer_0:reset_stream_in, video_pixel_buffer_dma_0:reset, video_pll_0:ref_reset_reset, video_rgb_resampler_0:reset]
+	wire         rst_controller_reset_out_reset;                                             // rst_controller:reset_out -> [button0:reset_n, jtag_uart_0:rst_n, keycode:reset_n, mm_interconnect_0:video_pixel_buffer_dma_0_reset_reset_bridge_in_reset_reset, otg_hpi_address:reset_n, otg_hpi_cs:reset_n, otg_hpi_data:reset_n, otg_hpi_r:reset_n, otg_hpi_reset:reset_n, otg_hpi_w:reset_n, sram_0:reset, video_dual_clock_buffer_0:reset_stream_in, video_pixel_buffer_dma_0:reset, video_pll_0:ref_reset_reset, video_rgb_resampler_0:reset]
 	wire         rst_controller_001_reset_out_reset;                                         // rst_controller_001:reset_out -> [irq_mapper:reset, mm_interconnect_0:nios2_gen2_0_reset_reset_bridge_in_reset_reset, nios2_gen2_0:reset_n, onchip_memory2_0:reset, rst_translator:in_reset, sdram_pll:reset, sysid_qsys_0:reset_n]
 	wire         rst_controller_001_reset_out_reset_req;                                     // rst_controller_001:reset_req -> [nios2_gen2_0:reset_req, onchip_memory2_0:reset_req, rst_translator:reset_req_in]
 	wire         nios2_gen2_0_debug_reset_request_reset;                                     // nios2_gen2_0:debug_reset_request -> [rst_controller_001:reset_in1, rst_controller_002:reset_in1]
 	wire         rst_controller_002_reset_out_reset;                                         // rst_controller_002:reset_out -> [mm_interconnect_0:sdram_reset_reset_bridge_in_reset_reset, sdram:reset_n]
 	wire         rst_controller_003_reset_out_reset;                                         // rst_controller_003:reset_out -> [video_dual_clock_buffer_0:reset_stream_out, video_vga_controller_0:reset]
+
+	final385_soc_button0 button0 (
+		.clk      (clk_clk),                               //                 clk.clk
+		.reset_n  (~rst_controller_reset_out_reset),       //               reset.reset_n
+		.address  (mm_interconnect_0_button0_s1_address),  //                  s1.address
+		.readdata (mm_interconnect_0_button0_s1_readdata), //                    .readdata
+		.in_port  (button0_export)                         // external_connection.export
+	);
 
 	final385_soc_jtag_uart_0 jtag_uart_0 (
 		.clk            (clk_clk),                                                     //               clk.clk
@@ -485,6 +496,8 @@ module final385_soc (
 		.video_pixel_buffer_dma_0_avalon_pixel_dma_master_readdata      (video_pixel_buffer_dma_0_avalon_pixel_dma_master_readdata),                  //                                                     .readdata
 		.video_pixel_buffer_dma_0_avalon_pixel_dma_master_readdatavalid (video_pixel_buffer_dma_0_avalon_pixel_dma_master_readdatavalid),             //                                                     .readdatavalid
 		.video_pixel_buffer_dma_0_avalon_pixel_dma_master_lock          (video_pixel_buffer_dma_0_avalon_pixel_dma_master_lock),                      //                                                     .lock
+		.button0_s1_address                                             (mm_interconnect_0_button0_s1_address),                                       //                                           button0_s1.address
+		.button0_s1_readdata                                            (mm_interconnect_0_button0_s1_readdata),                                      //                                                     .readdata
 		.jtag_uart_0_avalon_jtag_slave_address                          (mm_interconnect_0_jtag_uart_0_avalon_jtag_slave_address),                    //                        jtag_uart_0_avalon_jtag_slave.address
 		.jtag_uart_0_avalon_jtag_slave_write                            (mm_interconnect_0_jtag_uart_0_avalon_jtag_slave_write),                      //                                                     .write
 		.jtag_uart_0_avalon_jtag_slave_read                             (mm_interconnect_0_jtag_uart_0_avalon_jtag_slave_read),                       //                                                     .read

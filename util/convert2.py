@@ -1,6 +1,8 @@
 from PIL import Image
 from bitstring import BitArray
 import sys
+import struct
+import math
 
 # Image format: RGBA, little endian
 class Generic_Image():
@@ -33,17 +35,22 @@ def convert(batch, output):
     
     flag = '' #B, C, F, T 
     for line in batch:
+        line = line.strip()
         if line == "[Background]":
             flag = 'B'
-            continue
+            print("processing background")
+            continue    
         if line == "[Character]":
             flag = 'C'
+            print("processing character")
             continue
         if line == "[Font]":
             flag = 'F'
+            print("processing font")
             continue
         if line == "[Script]":
             flag = 'S'
+            print("processing script")
             continue
             
         if flag == 'B':
@@ -55,35 +62,65 @@ def convert(batch, output):
             continue
             
         if flag == 'C':
-            #parse the offset_info
-            convert_chara(line, chara)
+            temp = line.split()
+            convert_chara(temp[0], int(temp[1]), int(temp[2]), chara)
             continue
             
         if flag == 'S':
-            #parse quotation
             convert_text(line, text)
             continue
-    
     assemble(background, chara, font, text, output)
     
 def assemble(background, chara, font, text, file_handle):
-    offset = 0
+    addr_offset = 0
     
+    file_handle.write('B'.encode()+b'\x00\x00\x00')
     #start with background
     for bg in background:
-        
-        offset = offset + width*height
+        file_handle.write(struct.pack("<I", bg.width))
+        file_handle.write(struct.pack("<I", bg.height))
+        file_handle.write(struct.pack("<I", addr_offset))
+        addr_offset = addr_offset + (bg.width*bg.height)
     
     #chara
+    file_handle.write('C'.encode()+b'\x00\x00\x00')
+    for c in chara:
+        file_handle.write(struct.pack("<I", c.width))
+        file_handle.write(struct.pack("<I", c.height))
+        file_handle.write(struct.pack("<I", c.offset_x))
+        file_handle.write(struct.pack("<I", c.offset_y))
+        file_handle.write(struct.pack("<I", addr_offset))
+        
+        addr_offset = addr_offset + (c.width * c.height)
     
     #font
+    file_handle.write('F'.encode()+b'\x00\x00\x00')
+    for f in font:
+        file_handle.write(struct.pack("<I", f.width))
+        file_handle.write(struct.pack("<I", f.height))
+        file_handle.write(struct.pack("<I", addr_offset))
+        
+        addr_offset = addr_offset + (f.width * f.height)
     
     #text
+    file_handle.write('T'.encode()+b'\x00\x00\x00')
+    for t in text:
+        file_handle.write(struct.pack("<I", t.length))
+        file_handle.write(struct.pack("<I", addr_offset))
+        
+        addr_offset = addr_offset + t.length
     
-    
-    
-    #where the file is made
-    
+    #data section
+    file_handle.write('D'.encode()+b'\x00\x00\x00')
+    for bg in background:
+        file_handle.write(bg.image)
+    for c in chara:
+        file_handle.write(c.image)
+    for f in font:
+        file_handle.write(f.image)
+    for t in text:
+        file_handle.write(t.text)
+        
 def return_generic_image(file_name):
     im = Image.open(file_name)
     
@@ -108,32 +145,36 @@ def return_generic_image(file_name):
             + (int(pixel_value[3]) << 8)
             )
             
-            buf = buf + BitArray(uintle = temp, length=32).bytes
+            buf = buf + struct.pack("<I", temp)
     return Generic_Image(width, height, 0, buf)
 
 def convert_generic_image(file_name, image_list):
+    print("processing: "+file_name)
     image_list.append(return_generic_image(file_name)) 
     
 def convert_chara(file_name, offset_x, offset_y, chara_list):
+    print("processing: "+file_name)
     temp = return_generic_image(file_name)
-    chara_list.append(temp.width, temp.height, offset_x, offset_y, 0, temp.image)
+    chara_list.append(Chara(temp.width, temp.height, offset_x, offset_y, 0, temp.image))
     
-def convert_text(line, text_list)
-    buf = line.encode() + b'\x00'
-    zeropad_len = math.ceil(len(buf) / 4.0) - len(buf) 
+def convert_text(line, text_list):
+    buf = line.encode() + b'\0'
+    zeropad_len = 4 * math.ceil(len(buf) / 4.0) - len(buf) 
     padded_len = math.ceil(len(buf) / 4.0)
-    
+    print(zeropad_len, len(buf))    
     #zero pad the strings
-    buf = buf + b'\x00'*zeropad_len
+    buf = buf + b'\0' * zeropad_len
+
     text_list.append(Text(padded_len, 0, buf))
     
 if __name__ == "__main__":
     if len(sys.argv) == 3:
-        batch = open(sys.argv[1], "r")
+        batch = open(sys.argv[1], "r", encoding="utf8")
         output = open(sys.argv[2], "wb")
         
         convert(batch, output)
         output.close()
+        batch.close()
         
     else:
         print("check your arguments.\n usage: convert.py [input png filename] [output ram file]\n")

@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Apr 27, 2019 11:46:33 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1556383593716</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>May 2, 2019 4:59:04 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1556834344733</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\low\Desktop\school\ece385_final\software\final385_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\final385_soc.sopcinfo</SopcDesignFile>
@@ -903,6 +903,12 @@
                 <addressRange>0x00000000 - 0x0001FFFF</addressRange>
                 <addressSpan>131072</addressSpan>
                 <attributes>memory</attributes>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>button0</slaveDescriptor>
+                <addressRange>0x00020000 - 0x0002000F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>otg_hpi_w</slaveDescriptor>

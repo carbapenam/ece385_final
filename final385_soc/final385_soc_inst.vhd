@@ -34,7 +34,8 @@
 			vga_SYNC               : out   std_logic;                                        -- SYNC
 			vga_R                  : out   std_logic_vector(7 downto 0);                     -- R
 			vga_G                  : out   std_logic_vector(7 downto 0);                     -- G
-			vga_B                  : out   std_logic_vector(7 downto 0)                      -- B
+			vga_B                  : out   std_logic_vector(7 downto 0);                     -- B
+			button0_export         : in    std_logic_vector(3 downto 0)  := (others => 'X')  -- export
 		);
 	end component final385_soc;
 
@@ -74,6 +75,7 @@
 			vga_SYNC               => CONNECTED_TO_vga_SYNC,               --                .SYNC
 			vga_R                  => CONNECTED_TO_vga_R,                  --                .R
 			vga_G                  => CONNECTED_TO_vga_G,                  --                .G
-			vga_B                  => CONNECTED_TO_vga_B                   --                .B
+			vga_B                  => CONNECTED_TO_vga_B,                  --                .B
+			button0_export         => CONNECTED_TO_button0_export          --         button0.export
 		);
 

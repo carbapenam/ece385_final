@@ -33,6 +33,7 @@
 		.vga_SYNC               (<connected-to-vga_SYNC>),               //                .SYNC
 		.vga_R                  (<connected-to-vga_R>),                  //                .R
 		.vga_G                  (<connected-to-vga_G>),                  //                .G
-		.vga_B                  (<connected-to-vga_B>)                   //                .B
+		.vga_B                  (<connected-to-vga_B>),                  //                .B
+		.button0_export         (<connected-to-button0_export>)          //         button0.export
 	);
 

@@ -119,7 +119,9 @@ module final385  ( input	       CLOCK_50,
 .vga_SYNC(VGA_SYNC_N),               //                .SYNC
 .vga_R(VGA_R),                  //                .R
 .vga_G(VGA_G),                  //                .G
-.vga_B(VGA_B)                   //                .B
+.vga_B(VGA_B),                   //                .B
+								 
+.button0_export(KEY)								 
 								 );
 								 
 								 

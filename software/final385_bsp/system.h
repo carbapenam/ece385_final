@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'final385_soc'
  * SOPC Builder design path: ../../final385_soc.sopcinfo
  *
- * Generated: Sat Apr 27 11:46:34 CDT 2019
+ * Generated: Thu May 02 16:59:05 CDT 2019
  */
 
 /*
@@ -178,6 +178,33 @@
 #define ALT_STDOUT_PRESENT
 #define ALT_STDOUT_TYPE "altera_avalon_jtag_uart"
 #define ALT_SYSTEM_NAME "final385_soc"
+
+
+/*
+ * button0 configuration
+ *
+ */
+
+#define ALT_MODULE_CLASS_button0 altera_avalon_pio
+#define BUTTON0_BASE 0x20000
+#define BUTTON0_BIT_CLEARING_EDGE_REGISTER 0
+#define BUTTON0_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define BUTTON0_CAPTURE 0
+#define BUTTON0_DATA_WIDTH 4
+#define BUTTON0_DO_TEST_BENCH_WIRING 0
+#define BUTTON0_DRIVEN_SIM_VALUE 0
+#define BUTTON0_EDGE_TYPE "NONE"
+#define BUTTON0_FREQ 50000000
+#define BUTTON0_HAS_IN 1
+#define BUTTON0_HAS_OUT 0
+#define BUTTON0_HAS_TRI 0
+#define BUTTON0_IRQ -1
+#define BUTTON0_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define BUTTON0_IRQ_TYPE "NONE"
+#define BUTTON0_NAME "/dev/button0"
+#define BUTTON0_RESET_VALUE 0
+#define BUTTON0_SPAN 16
+#define BUTTON0_TYPE "altera_avalon_pio"
 
 
 /*
@@ -506,7 +533,7 @@
 #define SYSID_QSYS_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_0_NAME "/dev/sysid_qsys_0"
 #define SYSID_QSYS_0_SPAN 8
-#define SYSID_QSYS_0_TIMESTAMP 1556383436
+#define SYSID_QSYS_0_TIMESTAMP 1556834183
 #define SYSID_QSYS_0_TYPE "altera_avalon_sysid_qsys"
 
 

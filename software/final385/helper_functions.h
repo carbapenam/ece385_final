@@ -10,7 +10,7 @@
 
 void test_assets(int offset);
 alt_u32 populate_structs();
-void display_text(char text[], volatile alt_u32 *FONT_BASE_ADDRESS);
+void display_text(char text[], volatile alt_u32 *FONT_BASE_ADDRESS, alt_up_pixel_buffer_dma_dev * pixel_buf_dev);
 void copy_str(char* dest, alt_u32 *src, int length_in_32_bits);
 
 static alt_u8 n_background = 0;
@@ -20,16 +20,16 @@ static alt_u8 n_text = 0;
 
 struct scene
 {
-	alt_u8 scene_id;
-	alt_u8 background_id;
-	alt_u8 character_id;
-	alt_u8 text_id_begin;
-	alt_u8 text_id_end;
+	alt_8 scene_id;
+	alt_8 background_id;
+	alt_8 character_id;
+	alt_16 text_id_begin;
+	alt_16 text_id_end;
 } scenes[60];
 
 struct character
 {
-	alt_u8 character_id;
+	alt_8 character_id;
 	alt_u16 width;
 	alt_u16 height;
 	alt_u16 offset_x;
@@ -46,7 +46,7 @@ struct font
 
 struct background
 {
-	alt_u8 background_id;
+	alt_8 background_id;
 	alt_u16 width;
 	alt_u16 height;
 	alt_u32 address;
@@ -54,7 +54,7 @@ struct background
 
 struct text
 {
-	alt_u8 text_id;
+	alt_8 text_id;
 	alt_u8 length;
 	alt_u32 address;
 } texts[180];

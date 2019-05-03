@@ -34,7 +34,8 @@ module final385_soc (
 	vga_SYNC,
 	vga_R,
 	vga_G,
-	vga_B);	
+	vga_B,
+	button0_export);	
 
 	input		clk_clk;
 	output	[7:0]	keycode_export;
@@ -71,4 +72,5 @@ module final385_soc (
 	output	[7:0]	vga_R;
 	output	[7:0]	vga_G;
 	output	[7:0]	vga_B;
+	input	[3:0]	button0_export;
 endmodule
